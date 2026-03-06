@@ -1,0 +1,22 @@
+[
+  {
+    "username": "admin",
+    "salt": "eb050795b95e8788efc74e8dbb94429c",
+    "password_hash": "0e29805f880f360358e981582fd890c835ba57de00f5883bcb7af752c1793d1a",
+    "created_at": 1772793944.8548582,
+    "last_login": 1772794040.0393796,
+    "failed_attempts": 0,
+    "locked_until": 0.0,
+    "last_fail_ts": 0.0
+  },
+  {
+    "username": "test",
+    "salt": "9806dd669eab8bc80699d48e51e0be70",
+    "password_hash": "517942293fb6757d2f8d9f526de53b923efd5a6ceb932e927ffbe37e29893b88",
+    "created_at": 1772794007.2787254,
+    "last_login": 1772794051.1783135,
+    "failed_attempts": 0,
+    "locked_until": 0.0,
+    "last_fail_ts": 0.0
+  }
+]

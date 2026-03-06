@@ -1,0 +1,13 @@
+[2026-03-06 12:33:14] REGISTER: Пользователь admin зарегистрирован.
+[2026-03-06 12:33:23] LOGIN_FAIL: Неизвестный пользователь 'a', риск 65, причины: неизвестный пользователь, короткий пароль (<6)
+[2026-03-06 12:33:41] LOGIN_OK: Пользователь admin вошёл в систему
+[2026-03-06 12:34:12] LOGIN_OK: Пользователь admin вошёл в систему
+[2026-03-06 12:39:46] REGISTRACIJA: Lietotājs admin reģistrēts.
+[2026-03-06 12:39:58] PIESLEGSANAS VEIKSMIGA: Lietotājs admin pieslēdzās
+[2026-03-06 12:45:44] REGISTRACIJA: Lietotājs admin reģistrēts.
+[2026-03-06 12:45:54] PIESLEGSANAS VEIKSMIGA: Lietotājs admin pieslēdzās
+[2026-03-06 12:46:28] PIESLEGSANAS VEIKSMIGA: Lietotājs admin pieslēdzās
+[2026-03-06 12:46:47] REGISTRACIJA: Lietotājs test reģistrēts.
+[2026-03-06 12:47:01] PIESLEGSANAS VEIKSMIGA: Lietotājs test pieslēdzās
+[2026-03-06 12:47:20] PIESLEGSANAS VEIKSMIGA: Lietotājs admin pieslēdzās
+[2026-03-06 12:47:31] PIESLEGSANAS VEIKSMIGA: Lietotājs test pieslēdzās
