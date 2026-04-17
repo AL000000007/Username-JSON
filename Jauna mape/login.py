@@ -58,6 +58,20 @@ class Lietotajs:
             last_fail_ts=dati.get("last_fail_ts", 0.0)
         )
 
+# JAUNĀ KODA DAĻA (LoginAttempt un funkcija)
+@dataclass
+class LoginAttempt:
+    username: str
+    timestamp: float
+    success: bool
+
+def get_recent_failed_attempts(attempts: List[LoginAttempt], hours: float = 24) -> List[LoginAttempt]:
+    """Atgriež neveiksmīgos mēģinājumus pēdējo 'hours' stundu laikā."""
+    tagad = time.time()
+    robeza = tagad - (hours * 3600)
+    return [m for m in attempts if not m.success and m.timestamp >= robeza]
+# JAUNĀS DAĻAS BEIGAS
+
 class Glabatuve:
     def __init__(self, faila_nosaukums: str = USERS_FILENAME):
         self.faila_nosaukums = faila_nosaukums
@@ -80,6 +94,7 @@ class AutentifikacijasServiss:
     def __init__(self, glabatuve: Glabatuve):
         self.glabatuve = glabatuve
         self.lietotaji: Dict[str, Lietotajs] = {}
+        self.meginajumi: List[LoginAttempt] = []
         self._ieladet_lietotajus()
 
     def _ieladet_lietotajus(self):
@@ -165,12 +180,17 @@ class AutentifikacijasServiss:
             print("Nepareizs lietotājvārds vai parole.")
             print(f"Risks: {risks} ({iemeslu_teksts}) -> Bloķēts: {blokets_ilgums}s (nav attiecināms, lietotājs nav atrasts)")
             ierakstit_audita_zurnalu("PIESLEGSANAS NEVEIKSME", f"Nezināms lietotājs '{username}', risks {risks}, iemesli: {iemeslu_teksts}")
+            # Reģistrē neveiksmīgu mēģinājumu (nezināms lietotājs)
+            self.meginajumi.append(LoginAttempt(username, tagad, False))
+            if len(self.meginajumi) > 1000:
+                self.meginajumi = self.meginajumi[-1000:]
             return False
 
         if lietotajs.ir_blokets(tagad):
             atlikusas_sekundes = int(lietotajs.locked_until - tagad)
             print(f"Konts ir bloķēts. Mēģini vēlreiz pēc {atlikusas_sekundes} sekundēm.")
             ierakstit_audita_zurnalu("PIESLEGSANAS BLOKETA", f"Lietotājs {username} mēģināja pieslēgties bloķēšanas laikā")
+            # Bloķēšanas laikā mēģinājumu neierakstām kā "parastu neveiksmi", bet varam, ja vēlas
             return False
 
         salt = bytes.fromhex(lietotajs.salt)
@@ -185,6 +205,10 @@ class AutentifikacijasServiss:
             self._saglabat_lietotajus()
             ierakstit_audita_zurnalu("PIESLEGSANAS VEIKSMIGA", f"Lietotājs {username} pieslēdzās")
             print("Pieslēgšanās veiksmīga!")
+            # Reģistrē veiksmīgu mēģinājumu
+            self.meginajumi.append(LoginAttempt(username, tagad, True))
+            if len(self.meginajumi) > 1000:
+                self.meginajumi = self.meginajumi[-1000:]
             return True
         else:
             iepriekseja_neveiksme = lietotajs.last_fail_ts
@@ -203,6 +227,10 @@ class AutentifikacijasServiss:
             print("Nepareiza parole.")
             print(f"Risks: {risks} ({iemeslu_teksts}) -> Bloķēts: {blokets_ilgums}s")
             ierakstit_audita_zurnalu("PIESLEGSANAS NEVEIKSME", f"Lietotājs {username}, risks {risks}, iemesli: {iemeslu_teksts}")
+            # Reģistrē neveiksmīgu mēģinājumu
+            self.meginajumi.append(LoginAttempt(username, tagad, False))
+            if len(self.meginajumi) > 1000:
+                self.meginajumi = self.meginajumi[-1000:]
             return False
 
     def profils(self, username: str) -> Optional[Lietotajs]:
@@ -251,6 +279,17 @@ def galvena_izvelne():
                                 print("Bloķēts: nē")
                             if lietotajs.last_fail_ts:
                                 print(f"Pēdējais neveiksmīgais mēģinājums: {time.ctime(lietotajs.last_fail_ts)}")
+                            
+                            # JAUNĀ DAĻA
+                            pedejas_neveiksmes = get_recent_failed_attempts(serviss.meginajumi, hours=24)
+                            manas_neveiksmes = [m for m in pedejas_neveiksmes if m.username == username]
+                            if manas_neveiksmes:
+                                print(f"\n📊 Pēdējo 24 stundu neveiksmīgie mēģinājumi (tikai Jūsu kontam): {len(manas_neveiksmes)}")
+                                for m in manas_neveiksmes[-5:]:  # rāda pēdējos 5
+                                    print(f"  - {time.ctime(m.timestamp)}")
+                            else:
+                                print("\n✅ Pēdējo 24 stundu laikā nav neveiksmīgu mēģinājumu Jūsu kontam.")
+                            # JAUNĀS DAĻAS BEIGAS
                         else:
                             print("Profils nav atrasts (kļūda).")
                     elif apaksizvele == "2":
